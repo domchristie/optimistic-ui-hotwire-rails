@@ -1,0 +1,15 @@
+<article id="<%= local_assigns[:id] %>" <%= "data-persisted" if local_assigns[:persisted] %>>
+  <header>
+    <%= header %>
+  </header>
+
+  <div class="comment-body">
+    <div class="bubble">
+      <%= body %>
+    </div>
+  </div>
+
+  <footer>
+    <%= footer %>
+  </footer>
+</article>
