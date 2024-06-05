@@ -1,24 +1,75 @@
-# README
+# Optimistic UI with Ruby on Rails and Hotwire
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Combining a Stimulus controller and Turbo Stream to provide immediate feedback once a form is submitted. It's far from the potential full-fidelity of a local first, fully client rendered approach, but offers a [Good Enough™️](https://youtu.be/SWEts0rlezA?si=Tlx_rvyfzAIjCiwf&t=701) experience that provides more context than simply updating the submit button with "Loading…".
 
-Things you may want to cover:
+## Accessing Submitted Params
 
-* Ruby version
+This approach lets developers access the submitted form parameters, so that optimistic updates preview the submission. For example, the following will render a comment with the submitted body:
 
-* System dependencies
+```erb
+<%= form_with model: @comment, data: {controller: "optimistic-form", action: "optimistic-form#performActions"} do |form| %>
+  <%= form.text_field :body, autofocus: true %>
+  <%= form.submit "Send" %>
 
-* Configuration
+  <%= optimistic_actions do %>
+    <%= turbo_stream.prepend "comments", partial: "application/comment", locals: {
+      body: "${params['comment[body]']}",
+    } %>
+  <% end %>
+<% end %>
+```
 
-* Database creation
+The form has a `comment[body]` field, and it's submitted value can be accessed and rendered with `"${params['comment[body]']}"`.
 
-* Database initialization
+## Arbitrary JavaScript Statements
 
-* How to run the test suite
+In fact, you can render any JavaScript statement, for example:
 
-* Services (job queues, cache servers, search engines, etc.)
+```erb
+<%= form_with … do |form| %>
+  <%# … %>
 
-* Deployment instructions
+  <%= optimistic_actions do %>
+    <%= turbo_stream.prepend "comments", partial: "application/comment", locals: {
+      body: "${params['comment[body]']}",
+      footer: "${new Date().toLocaleString('en-GB', { timeStyle: 'short' })}"
+    } %>
+  <% end %>
+<% end %>
+```
 
-* ...
+## Extending `OptimisticFormController` with Helpers
+
+And you can extend the `OptimisticFormController` to provide rendering helpers. In addition to `params`, optimistic actions also get access to the `controller`. So to add simple formatting:
+
+```js
+import OptimisticFormController from "controllers/optimistic_form_controller"
+OptimisticFormController.prototype.simpleFormat = function (text) {
+  text
+    .replace(/\r\n?/g, '\n')
+    .replace(/\n\n+/g, '</p>\n\n<p>')
+    .replace(/([^\n]\n)(?=[^\n])/g, '$1<br/>')
+  return `<p>${text}</p>`
+}
+```
+
+```erb
+<%= form_with … do |form| %>
+  <%# … %>
+
+  <%= optimistic_actions do %>
+    <%= turbo_stream.prepend "comments", partial: "application/comment", locals: {
+      body: "${controller.simpleFormat(params['comment[body]'])}",
+      footer: "${new Date().toLocaleString('en-GB', { timeStyle: 'short' })}"
+    } %>
+  <% end %>
+<% end %>
+```
+
+## Credits
+
+[Karol Bucek](https://github.com/kares) for the [`simpleFormat` JavaScript implementation](https://gist.github.com/kares/740162).
+
+## License
+
+Copyright © 2024+ Dom Christie and released under the MIT license.
