@@ -6,6 +6,7 @@ export default class OptimisticFormController extends Controller {
   async performActions () {
     this.element.insertAdjacentHTML(
       'beforeend', this.#render(this.actionsTarget, {
+        escape,
         controller: this,
         params: this.params
       })
@@ -21,4 +22,10 @@ export default class OptimisticFormController extends Controller {
     ...Object.keys(props), `return \`${template.innerHTML}\``
     ))(...Object.values(props))
   }
+}
+
+function escape (string) {
+  var div = document.createElement('div')
+  div.appendChild(document.createTextNode(string))
+  return div.innerHTML
 }

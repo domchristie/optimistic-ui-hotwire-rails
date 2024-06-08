@@ -1,10 +1,10 @@
 # Optimistic UI with Ruby on Rails and Hotwire
 
-Combining a Stimulus controller and Turbo Stream to provide immediate feedback once a form is submitted. It's far from the potential full-fidelity of a local first, fully client rendered approach, but offers a [Good Enough™️](https://youtu.be/SWEts0rlezA?si=Tlx_rvyfzAIjCiwf&t=701) experience that provides more context than simply updating the submit button with "Loading…".
+An optimistic UI demo that combines a Stimulus controller and Turbo Stream to provide immediate feedback once a form is submitted. It's far from the potential full-fidelity of a local first, fully client rendered approach, but offers a [Good Enough™️](https://youtu.be/SWEts0rlezA?si=Tlx_rvyfzAIjCiwf&t=701) experience that provides more context than simply updating the submit button with "Loading…".
 
 ## Accessing Submitted Params
 
-This approach lets developers access the submitted form parameters, so that optimistic updates preview the submission. For example, the following will render a comment with the submitted body:
+Submitted parameters are available in the template via `params`, so that optimistic updates can preview the submission. For example, the following will render a comment with the submitted body:
 
 ```erb
 <%= form_with model: @comment, data: {controller: "optimistic-form", action: "optimistic-form#performActions"} do |form| %>
@@ -13,13 +13,13 @@ This approach lets developers access the submitted form parameters, so that opti
 
   <%= optimistic_actions do %>
     <%= turbo_stream.prepend "comments", partial: "application/comment", locals: {
-      body: "${params['comment[body]']}",
+      body: "${escape(params['comment[body]'])}",
     } %>
   <% end %>
 <% end %>
 ```
 
-The form has a `comment[body]` field, and it's submitted value can be accessed and rendered with `"${params['comment[body]']}"`.
+The form has a `comment[body]` field, and it's submitted value can be accessed and rendered with `"${escape(params['comment[body]'])}"`.
 
 ## Arbitrary JavaScript Statements
 
@@ -31,7 +31,7 @@ In fact, you can render any JavaScript statement, for example:
 
   <%= optimistic_actions do %>
     <%= turbo_stream.prepend "comments", partial: "application/comment", locals: {
-      body: "${params['comment[body]']}",
+      body: "${escape(params['comment[body]'])}",
       footer: "${new Date().toLocaleString('en-GB', { timeStyle: 'short' })}"
     } %>
   <% end %>
@@ -40,7 +40,7 @@ In fact, you can render any JavaScript statement, for example:
 
 ## Extending `OptimisticFormController` with Helpers
 
-And you can extend the `OptimisticFormController` to provide rendering helpers. In addition to `params`, optimistic actions also get access to the `controller`. So to add simple formatting:
+Extend `OptimisticFormController` to provide rendering helpers. In addition to `params`, optimistic actions also get access to the `controller`. So to add simple formatting:
 
 ```js
 import OptimisticFormController from "controllers/optimistic_form_controller"
@@ -59,7 +59,7 @@ OptimisticFormController.prototype.simpleFormat = function (text) {
 
   <%= optimistic_actions do %>
     <%= turbo_stream.prepend "comments", partial: "application/comment", locals: {
-      body: "${controller.simpleFormat(params['comment[body]'])}",
+      body: "${controller.simpleFormat(escape(params['comment[body]']))}",
       footer: "${new Date().toLocaleString('en-GB', { timeStyle: 'short' })}"
     } %>
   <% end %>
