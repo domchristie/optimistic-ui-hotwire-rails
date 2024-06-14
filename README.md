@@ -1,6 +1,6 @@
 # Optimistic UI with Ruby on Rails and Hotwire
 
-An optimistic UI demo that combines a Stimulus controller and Turbo Stream to provide immediate feedback once a form is submitted. It's far from the potential full-fidelity of a local first, fully client rendered approach, but offers a [Good Enough™️](https://youtu.be/SWEts0rlezA?si=Tlx_rvyfzAIjCiwf&t=701) experience that provides more context than simply updating the submit button with "Loading…".
+An optimistic UI demo that combines [Composite](https://github.com/domchristie/composite) with a Stimulus controller and Turbo Stream to provide immediate feedback once a form is submitted. It's far from the potential full-fidelity of a local first, fully client rendered approach, but offers a [Good Enough™️](https://youtu.be/SWEts0rlezA?si=Tlx_rvyfzAIjCiwf&t=701) experience that provides more context than simply updating the submit button with "Loading…".
 
 ## Accessing Submitted Params
 
@@ -13,13 +13,13 @@ Submitted parameters are available in the template via `params`, so that optimis
 
   <%= optimistic_actions do %>
     <%= turbo_stream.prepend "comments", partial: "application/comment", locals: {
-      body: "${escape(params['comment[body]'])}",
+      body: "${params['comment[body]']}",
     } %>
   <% end %>
 <% end %>
 ```
 
-The form has a `comment[body]` field, and it's submitted value can be accessed and rendered with `"${escape(params['comment[body]'])}"`.
+The form has a `comment[body]` field, and it's submitted value can be accessed and rendered with `"${params['comment[body]']}"`.
 
 ## Arbitrary JavaScript Statements
 
@@ -31,7 +31,7 @@ In fact, you can render any JavaScript statement, for example:
 
   <%= optimistic_actions do %>
     <%= turbo_stream.prepend "comments", partial: "application/comment", locals: {
-      body: "${escape(params['comment[body]'])}",
+      body: "${params['comment[body]']}",
       footer: "${new Date().toLocaleString('en-GB', { timeStyle: 'short' })}"
     } %>
   <% end %>
@@ -43,13 +43,15 @@ In fact, you can render any JavaScript statement, for example:
 Extend `OptimisticFormController` to provide rendering helpers. In addition to `params`, optimistic actions also get access to the `controller`. So to add simple formatting:
 
 ```js
+import { escape, raw } from '@domchristie/composite'
 import OptimisticFormController from "controllers/optimistic_form_controller"
 OptimisticFormController.prototype.simpleFormat = function (text) {
+  text = escape(text)
   text
     .replace(/\r\n?/g, '\n')
     .replace(/\n\n+/g, '</p>\n\n<p>')
     .replace(/([^\n]\n)(?=[^\n])/g, '$1<br/>')
-  return `<p>${text}</p>`
+  return raw(`<p>${text}</p>`)
 }
 ```
 
@@ -59,7 +61,7 @@ OptimisticFormController.prototype.simpleFormat = function (text) {
 
   <%= optimistic_actions do %>
     <%= turbo_stream.prepend "comments", partial: "application/comment", locals: {
-      body: "${controller.simpleFormat(escape(params['comment[body]']))}",
+      body: "${controller.simpleFormat(params['comment[body]'])}",
       footer: "${new Date().toLocaleString('en-GB', { timeStyle: 'short' })}"
     } %>
   <% end %>
