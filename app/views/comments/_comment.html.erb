@@ -1,6 +1,4 @@
 <%= render "application/comment", {
-  id: comment.id,
-  header: comment.author,
   body: simple_format(comment.body),
   footer: comment.created_at.to_fs(:short),
   persisted: true

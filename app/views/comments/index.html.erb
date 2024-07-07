@@ -1,6 +1,17 @@
 <%= turbo_refreshes_with scroll: :preserve %>
 
-<%= render "form" %>
+<%= form_with model: @comment, data: {controller: "optimistic-form", action: "optimistic-form#performActions"} do |form| %>
+  <%= form.text_area :body, autofocus: true %>
+  <%= form.submit "Send" %>
+
+  <template data-optimistic-form-target="actions">
+    <%= turbo_stream.prepend "comments", partial: "application/comment", locals: {
+      body: "${controller.simpleFormat(params['comment[body]'])}",
+      footer: "Sending…",
+      optimistic: true
+    } %>
+  </template>
+<% end %>
 
 <div id="comments">
   <%= render @comments %>
