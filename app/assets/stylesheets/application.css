@@ -34,8 +34,13 @@ textarea {
   height: 2.5rem;
   font-size: inherit;
 }
-input[type=text]:focus {
+input[type=text]:focus,
+textarea:focus {
   border-color: #06f;
+}
+textarea {
+  line-height: 1.5;
+  padding: 0.375rem;
 }
 
 [type=submit] {
