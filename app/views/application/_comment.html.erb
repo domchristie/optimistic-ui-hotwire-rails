@@ -1,8 +1,4 @@
-<article id="<%= local_assigns[:id] %>" <%= "data-persisted" if local_assigns[:persisted] %>>
-  <header>
-    <%= header %>
-  </header>
-
+<article <%= "data-optimistic" if local_assigns[:optimistic] %>>
   <div class="comment-body">
     <div class="bubble">
       <%= body %>

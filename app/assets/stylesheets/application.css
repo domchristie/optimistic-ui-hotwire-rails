@@ -60,14 +60,6 @@ article + article {
   margin-top: 1rem;
 }
 
-article {
-  opacity: 0.25;
-}
-
-article[data-persisted] {
-  opacity: 1;
-}
-
 article header,
 article footer {
   font-size: 0.875em;
@@ -87,4 +79,10 @@ article p + p {
   border-radius: 1.25rem;
   border: 2px solid;
   padding: 0.3125rem 0.625rem;
+}
+
+article[data-optimistic] .bubble {
+  color: #666;
+  border-color: #e6e6e6;
+  background-color: #f9f9f9;
 }
